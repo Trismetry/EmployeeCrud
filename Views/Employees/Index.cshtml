@@ -1,0 +1,185 @@
+﻿@using EmployeeCrud.Models;
+
+@model List<Employee>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>List</title>
+    <script type="text/javascript">
+
+
+        $(function () {
+            $('#List').datagrid({
+                url: '/Employees/GetList',
+                method: 'post',
+                title: 'Employees list',
+                width: $(window).width() - 10,
+                height: $(window).height() - 35,
+                fitColumns: true,
+                idField: 'Id',
+                loadMsg: 'Loading Employees information...',
+                pagination: true,
+                singleSelect: false,
+                pageNumber: 1,
+                pageList: [10, 20, 30],
+                queryStr: {},
+                columns: [[
+                    { field: 'ck', checkbox: true, align: 'left', width: 50 },
+                    { field: 'Id', title: 'Id', width: 80 },
+                    { field: 'PersonnelNumber', title: 'Personnel Number', width: 120 },
+                    { field: 'FirstLastMidName', title: 'First, Last & Middle Name', width: 120 },
+                    { field: 'IsCompanyWorker', title: 'Is Company Worker', width: 120 },
+
+                ]],
+                toolbar: [{
+                    id: 'btnadd',
+                    text: 'Add',
+                    iconCls: 'icon-add',
+                    handler: function () {
+                        $("#modalwindow").html("<iframe width='100%' height='98%' scrolling='no' frameborder='0'' src='/Employees/Create'></iframe>");
+                        $("#modalwindow").window({ title: 'Add new Employee', width: 700, height: 400, iconCls: 'icon-add' }).window('open');
+                    }
+                }, '-', {
+                    id: 'btnDelete',
+                    text: 'Delete',
+                    iconCls: 'icon-cut',
+                    handler: function () {
+                        var row = $('#List').datagrid('getSelected');
+                        if (row != null) {
+                            $.messager.confirm('Tips', 'Determine Delete', function (r) {
+                                if (r) {
+                                    $.post("/Employees/Delete?id=" + row.Id, function (data) {
+                                        if (data == 1)
+                                            $("#List").datagrid('load');
+                                        $.messageBox5s('Tips', 'Success');
+                                    }, "json");
+
+                                }
+                            });
+                        } else { $.messageBox5s('Tips', 'Please select a record to operate on'); }                 }
+                }, '-', {
+                    id: 'btnEdit',
+                    text: 'Edit',
+                    iconCls: 'icon-edit',
+                    handler: function () {
+                        var row = $('#List').datagrid('getSelected');
+                        if (row != null) {
+                            $("#modalwindow").html("<div style='width:100%; height:100%; display:block; '><iframe width='100%' height='99%'  frameborder='0' src='/Employees/Edit?id=" + row.Id + "&Ieguid=" + GetGuid() + "'></iframe></div>");
+                            $("#modalwindow").window({ title: 'Update employee information', width: 700, height: 430, iconCls: 'icon-edit' }).window('open');
+                        } else { $.messageBox5s('Tips', 'Please select a record to operate on'); }
+                    }
+
+                },
+                    '-', {
+                    id: 'btnImport',
+                    text: 'Import',
+                    iconCls: 'icon-search',
+                    handler: function () {
+                        $("#modalwindow").html("<iframe width='100%' height='98%' scrolling='no' frameborder='0' src='/Employees/Import'></iframe>");
+                        $("#modalwindow").window({ title: 'Import Data', width: 500, height: 300, iconCls: 'icon-details' }).window('open');
+
+                    }
+                }
+
+                ],
+                onHeaderContextMenu: function (e, field) {
+
+                }
+            });
+
+        })
+
+        //ifram returns
+        function frameReturnByClose() {
+            $("#modalwindow").window('close');
+        }
+        //iframe returns and refreshes
+        function frameReturnByReload(flag) {
+            if (flag)
+                $("#List").datagrid('load');
+            else
+                $("#List").datagrid('reload');
+        }
+        //Output Information
+        function frameReturnByMes(mes) {
+            $.messageBox5s('Tips', mes);
+        }
+        function GetGuid() {
+            var s4 = function () {
+                return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+            };
+            return s4() + s4() + s4() + "-" + s4();
+        }
+       
+
+
+        /**
+        * Called in iframe, with a prompt box in the parent window (herf mode does not use the parent window)
+            */
+        $.extend({
+            messageBox5s: function (title, msg) {
+                $.messager.show({
+                    title: title, msg: msg, timeout: 5000, showType: 'slide', style: {
+                        left: '',
+                        right: 5,
+                        top: '',
+                        bottom: -document.body.scrollTop - document.documentElement.scrollTop + 5
+                    }
+                });
+            }
+        });
+        $.extend({
+            messageBox10s: function (title, msg) {
+                $.messager.show({
+                    title: title, msg: msg, height: 'auto', width: 'auto', timeout: 10000, showType: 'slide', style: {
+                        left: '',
+                        right: 5,
+                        top: '',
+                        bottom: -document.body.scrollTop - document.documentElement.scrollTop + 5
+                    }
+                });
+            }
+        });
+        $.extend({
+            show_alert: function (strTitle, strMsg) {
+                $.messager.alert(strTitle, strMsg);
+            }
+        });
+
+        /**
+        * panel Recycle memory on shutdown, mainly for memory leaks when layout uses iframe to embed web pages
+        */
+        $.fn.panel.defaults.onBeforeDestroy = function () {
+
+            var frame = $('iframe', this);
+            try {
+                // alert('destroy, clear memory');
+                if (frame.length > 0) {
+                    for (var i = 0; i < frame.length; i++) {
+                        frame[i].contentWindow.document.write('');
+                        frame[i].contentWindow.close();
+                    }
+                    frame.remove();
+                    if ($.browser.msie) {
+                        CollectGarbage();
+                    }
+                }
+            } catch (e) {
+            }
+        };
+    </script>
+
+</head>
+
+<body style="margin:0;padding:0;">
+    <table id="List">
+    </table>
+    <div id="modalwindow"></div>
+</body>
+</html>

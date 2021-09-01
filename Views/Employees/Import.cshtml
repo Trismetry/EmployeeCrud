@@ -1,0 +1,126 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<body><div style="padding: 45px">
+    <div class="easyui-panel" title="Select json file to update/create employees" style="width:100%;max-width:400px;padding:30px 50px; ">
+        <form enctype="multipart/form-data" action="@Url.Action("ImportSave")" id="ff" name="ff" method="post">
+            <input id="fb" name="userfile[]" style="width:100%;" type="text">
+            <br />
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save'" id="btn-upload">Import</a>
+
+        </form>
+    </div>
+</div>
+        <div id="multiusage"></div>
+        <script type="text/javascript">
+        $(function () {
+
+            $('#fb').filebox({
+                buttonText: 'Browse...',
+                multiple: true,
+                icons: [{
+                    iconCls: 'icon-clear',
+                    handler: function (e) {
+                        $(e.data.target).filebox('clear');
+                    }
+                }],
+                onChange: function (newValue, oldValue) {
+                    if ($(this).textbox('getValue').length > 0) {
+                        $('#btn-upload').linkbutton('enable');
+                    }
+                    else { $('#btn-upload').linkbutton('disable'); }
+                }
+            });
+            var inputfile = $('#fb').next().find('.textbox-value');
+            $('#btn-upload').linkbutton({
+                iconCls: 'icon-upload', disabled: true, plain: true,
+                onClick: function () { upLoad(); }
+            });
+
+            // Function to execute on submit form
+            function upLoad() {
+                if ($('#fb').textbox('getValue').length === 0) {
+                    $.messager.alert('Message', 'Upload not possible.<br /><br />No file selected.', 'error');
+                    return false;
+                }
+              
+                $('#ff').form('submit', {
+                    url: '@Url.Action("ImportSave")',
+                    iframe: false,
+                    onProgress: function (percent) {
+                        progressFile('update', percent);
+                    },
+                    onSubmit: function (param) {
+                        progressFile('show');
+                    },
+                    success: function (data) {
+                        progressFile('close');
+                    }
+                });
+            }
+
+            // Show modal ProgrssBar when uploading file
+            function progressFile(method, val) {
+                var div_id = 'win-progress-file';
+                var progress_id = 'progress-file';
+                var htmlcontent = '<div id="' + progress_id + '" class="easyui-progressbar" style="width:100%;"></div>' +
+                    '<div style="margin-top: 10px; text-align: center; font-size: 1.3em; font-weight: bold;">Uploading files</div>';
+                var op = method.toLowerCase();
+                switch (op) {
+                    case 'show':
+                        $("#multiusage").append('<div id="' + div_id + '" style="padding: 20px;"></div>');
+                        $("#" + div_id).window({
+                            title: 'Wait ...',
+                            width: 300,
+                            resizable: false, shadow: false,
+                            minimizable: false, maximizable: false, collapsible: false, closable: false,
+                            modal: true,
+                            onClose: function (event, ui) {
+                                $("#" + div_id).window('destroy');
+                                $("#" + div_id).remove();
+                            },
+                            content: htmlcontent
+                        });
+                        break;
+                    case 'close':
+                        $("#" + div_id).window('close');
+                        break;
+                    case 'update':
+                        $("#" + progress_id).progressbar('setValue', val);
+                        break;
+
+                }
+            }
+
+            //Manage form submit return message (you can optionally exec specified function on success and on error)
+            function submitReturn(data, successCallback, errorCallback, showSavemsg) {
+                showSavemsg = typeof showSavemsg !== 'undefined' ? showSavemsg : true;
+                $.messager.progress('close');
+                progressFile('close');
+                try {
+                    var data = $.parseJSON(data);
+                } catch (e) {
+                    //        console.log(e);
+                    $.messager.alert('JavaScript Exception Error', data);
+                    errorCallback();
+                    return false;
+                }
+                if (data.error === true) {
+                    $.messager.alert('Server Error', data.message, 'error');
+                    errorCallback(data);
+                    return false;
+                } else {
+                    if (showSavemsg) {
+                        $.messager.show({
+                            title: 'Message',
+                            msg: '<span class="icon-ok"><img src="img/blank.gif" width="22" height="16"></span><span>Data successfully saved.</span>'
+                        });
+                    }
+                    successCallback(data);
+                }
+            }
+
+        });
+        </script>
+</body>

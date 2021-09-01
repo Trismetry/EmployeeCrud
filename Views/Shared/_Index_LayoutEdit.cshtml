@@ -1,0 +1,121 @@
+﻿@using EmployeeCrud.Models;
+
+@model Employee
+@{
+    ViewBag.Title = "Create new Employee";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string actionName = "PostEmployee";
+}
+<script type="text/javascript">
+    $(function () {
+          $("#btnSave").click(function () {
+            $.ajax({
+                url: "@Url.Action(actionName)",
+                type: "POST",
+                //method:'post',
+                data: $("#CreateForm").serialize(),
+                dataType: "json",
+                success: function (data) {
+                    if (data == "True") {
+                        window.parent.frameReturnByMes("Success");
+                        window.parent.frameReturnByReload(true);
+                        window.parent.frameReturnByClose()
+                    }
+                    else {
+                        window.parent.frameReturnByMes("fail");
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+<style type="text/css">
+    body { background-color: #777; }
+</style>
+
+<body>
+
+    <div style="padding:50px;">
+        @using (Html.BeginForm("PostEmployee", "Employees", null, FormMethod.Post, new
+        {
+            Id = "CreateForm",
+            @class = "easyui-panel"
+        }))
+        {
+            @Html.ValidationSummary(true)
+        <table class="fromEditTable setTextWidth300">
+            <tbody>
+                <tr>
+                    <td colspan="3" style="width:100px; text-align:right;">
+                        @Html.HiddenFor(model => model.Id)
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:100px; text-align:right;">
+                        @Html.LabelFor(model => model.PersonnelNumber):
+                    </td>
+                    <td>
+                        @Html.EditorFor(model => model.PersonnelNumber)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.PersonnelNumber)
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:100px; text-align:right;">
+                        @Html.LabelFor(model => model.FirstLastMidName):
+                    </td>
+
+                    <td>
+                        @Html.EditorFor(model => model.FirstLastMidName)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.FirstLastMidName)
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:100px; text-align:right;">
+                        @Html.LabelFor(model => model.IsMaleGender):
+                    </td>
+
+                    <td>
+                        @Html.CheckBoxFor(model => model.IsMaleGender)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.IsMaleGender)
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:100px; text-align:right;">
+                        @Html.LabelFor(model => model.IsCompanyWorker):
+                    </td>
+
+                    <td>
+                        @Html.CheckBoxFor(model => model.IsCompanyWorker)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.IsCompanyWorker)
+                    </td>
+                </tr>
+                <tr>
+                  <td style="width:100px; text-align:right;">
+                @Html.LabelFor(model => model.BirthDate):
+            </td>
+
+            <td>
+                @Html.EditorFor(model => model.BirthDate, new { htmlAttributes = new { @class = "easyui-datebox" } })
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.BirthDate)
+            </td>
+            </tr>
+           
+            </tbody>
+        </table>
+        }
+
+        <a id="btnSave" class="easyui-linkbutton" data-options="iconCls:'icon-save'">@RenderBody()</a>
+
+    </div>
+    </body>

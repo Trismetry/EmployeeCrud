@@ -1,0 +1,23 @@
+{employees:
+[
+  {"Id": 1,
+  "PersonnelNumber": 11111,
+  "FirstLastMidName": "Foo",
+  "IsMaleGender": true,
+  "BirthDate": "11.08.2021",
+  "IsCompanyWorker": true
+},{
+  "Id": "",
+  "PersonnelNumber": 222222,
+  "FirstLastMidName": "Foo",
+  "IsMaleGender": true,
+  "BirthDate": "11.08.2021",
+  "IsCompanyWorker": false
+},{
+  "Id": "",
+  "PersonnelNumber": 222222,
+  "FirstLastMidName": "Foo",
+  "IsMaleGender": true,
+  "BirthDate": "11.08.2021",
+  "IsCompanyWorker": true
+}]}
